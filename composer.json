@@ -1,0 +1,25 @@
+{
+    "name": "revelateur/revinstall",
+    "description": "Use it for install Wordplate project",
+    "require": {
+        "symfony/console": "^5.3",
+        "symfony/process": "^5.3"
+    },
+    "license": "MIT",
+    "bin": [
+        "bin/revinstall"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Revelateur\\Revinstall\\Console\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mathieu Menegain",
+            "email": "mmenegain@revelateur.fr"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
