@@ -94,6 +94,9 @@ class WPCommand extends General
         $this->runCommands($commands, $input, $output);
     }
 
+    /*
+     * Create and define the home page
+     */
     public function defineHomePage(InputInterface $input, OutputInterface $output)
     {
         // Create home page
