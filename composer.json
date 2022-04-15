@@ -4,7 +4,8 @@
     "require": {
         "symfony/console": "^5.3",
         "symfony/process": "^5.3",
-        "vlucas/phpdotenv": "^5.3"
+        "vlucas/phpdotenv": "^5.3",
+        "wp-cli/wp-cli-bundle": "^2.6"
     },
     "license": "MIT",
     "bin": [

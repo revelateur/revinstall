@@ -2,12 +2,10 @@
 
 namespace Revelateur\Revinstall\Console;
 
-use RuntimeException;
+use Dotenv\Dotenv;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Dotenv\Dotenv;
 
 class WPCommand extends General
 {
@@ -26,8 +24,6 @@ class WPCommand extends General
     /**
      * Execute the command.
      *
-     * @param  \Symfony\Component\Console\Input\InputInterface  $input
-     * @param  \Symfony\Component\Console\Output\OutputInterface  $output
      * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -35,6 +31,7 @@ class WPCommand extends General
         $this->decoration($output);
 
         $composer = $this->findComposer();
+        $wp = $this->findWP();
 
         $this->verifyEnvExist();
         $dotenv = Dotenv::createImmutable(getcwd());
@@ -50,29 +47,30 @@ class WPCommand extends General
 
         chdir(getcwd());
         $commands = [
-            $composer." u",
-            'wp core install --url='.$url.' --title='.$title.' --admin_user='.$user.' --admin_password='.$pass.' --admin_email='.$mail,
-            'wp theme activate '.$_ENV['WP_THEME'],
-            'wp language core activate fr_FR',
-            'wp plugin activate --all',
-            'wp menu create "Menu Principal"',
-            'wp menu location assign menu-principal primary',
-            'wp menu create "Pied de page"',
-            'wp menu location assign pied-de-page footer',
-            'wp post delete 1 --force',
+            $composer.' u',
+            $wp.' core install --url='.$url.' --title="'.$title.'" --admin_user='.$user.' --admin_password='.$pass.' --admin_email='.$mail,
+            $wp.' theme activate '.$_ENV['WP_THEME'],
+            $wp.' language core activate fr_FR',
+            $wp.' plugin activate --all',
+            $wp.' menu create "Menu Principal"',
+            $wp.' menu location assign menu-principal primary',
+            $wp.' menu create "Pied de page"',
+            $wp.' menu location assign pied-de-page footer',
+            $wp.' post delete 1 --force',
+            $wp." option update permalink_structure '/%category%/%postname%/'",
         ];
 
         if (!empty($chown)) {
             $commands[] = 'sudo chown www-data:www-data -R ./public/uploads';
             $commands[] = 'sudo chmod 775 ./public/wp-config.php';
         }
-        
+
         $this->runCommands($commands, $input, $output);
-        $this->defineHomePage($input, $output);
+        $this->defineHomePage($input, $output, $wp);
 
         $commands = [
             'npm install',
-            'npm run build'
+            'npm run build',
         ];
 
         if (($process = $this->runCommands($commands, $input, $output))->isSuccessful()) {
@@ -83,12 +81,12 @@ class WPCommand extends General
     }
 
     /**
-     * Create database by .env file
+     * Create database by .env file.
      */
     protected function createDatabase(InputInterface $input, OutputInterface $output)
     {
         $commands = [
-            'mysql -h '.$_ENV['DB_HOST'].' -u '.$_ENV['DB_USER'].' -p'.$_ENV['DB_PASSWORD'].' -e "CREATE DATABASE IF NOT EXISTS '.$_ENV['DB_NAME'].'"'
+            'mysql -h '.$_ENV['DB_HOST'].' -u '.$_ENV['DB_USER'].' -p'.$_ENV['DB_PASSWORD'].' -e "CREATE DATABASE IF NOT EXISTS '.$_ENV['DB_NAME'].'"',
         ];
 
         $this->runCommands($commands, $input, $output);
@@ -97,19 +95,19 @@ class WPCommand extends General
     /*
      * Create and define the home page
      */
-    public function defineHomePage(InputInterface $input, OutputInterface $output)
+    public function defineHomePage(InputInterface $input, OutputInterface $output, $wp)
     {
         // Create home page
-        $command = 'wp post create --post_type=page --post_title="Accueil" --post_status=publish';
+        $command = $wp.' post create --post_type=page --post_title="Accueil" --post_status=publish';
         $post = $this->runCommand($command, $input, $output);
         preg_match('/(?<=post )(.*)(?=.)/', $post, $homeID);
 
         // Definie home page in read option
         $this->runCommands([
-            'wp option update show_on_front "page"',
-            'wp option update page_on_front "'.$homeID[0].'"',
-            'wp menu item add-post menu-principal '.$homeID[0],
-            'wp menu item add-post menu-principal 2'
+            $wp.' option update show_on_front "page"',
+            $wp.' option update page_on_front "'.$homeID[0].'"',
+            $wp.' menu item add-post menu-principal '.$homeID[0],
+            $wp.' menu item add-post menu-principal 2',
         ], $input, $output);
     }
 }

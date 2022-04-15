@@ -4,17 +4,15 @@ namespace Revelateur\Revinstall\Console;
 
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
 class General extends Command
 {
-    /**
-     *
-     */
     public function decoration(OutputInterface $output)
     {
         $output->write(PHP_EOL.'<fg=red>
@@ -26,7 +24,7 @@ class General extends Command
     }
 
     /**
-     * Question required params
+     * Question required params.
      */
     protected function questionRequired(string $text, InputInterface $input, OutputInterface $output)
     {
@@ -41,22 +39,24 @@ class General extends Command
     }
 
     /**
-     * Question params
+     * Question params.
      */
     protected function question(string $text, InputInterface $input, OutputInterface $output)
     {
         $helper = $this->getHelper('question');
         $question = new Question($text);
+
         return $helper->ask($input, $output, $question);
     }
 
     /**
-     * Question params
+     * Question params.
      */
     protected function confirm(string $text, InputInterface $input, OutputInterface $output)
     {
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion($text, false);
+
         return $helper->ask($input, $output, $question);
     }
 
@@ -77,9 +77,18 @@ class General extends Command
     }
 
     /**
+     * Get the wp-cli command for the environment.
+     *
+     * @return string
+     */
+    protected function findWP()
+    {
+        return __DIR__.'/../vendor/wp-cli/wp-cli/bin/wp';
+    }
+
+    /**
      * Verify that the .env exist.
      *
-     * @param  string  $directory
      * @return void
      */
     protected function verifyEnvExist()
@@ -92,15 +101,13 @@ class General extends Command
     /**
      * Run the given commands.
      *
-     * @param  array  $commands
-     * @param  \Symfony\Component\Console\Input\InputInterface  $input
-     * @param  \Symfony\Component\Console\Output\OutputInterface  $output
-     * @param  array  $env
+     * @param array $commands
+     *
      * @return \Symfony\Component\Process\Process
      */
     protected function runCommands($commands, InputInterface $input, OutputInterface $output, array $env = [])
     {
-        if (! $output->isDecorated()) {
+        if (!$output->isDecorated()) {
             $commands = array_map(function ($value) {
                 if (substr($value, 0, 5) === 'chmod') {
                     return $value;
@@ -140,7 +147,7 @@ class General extends Command
     public function runCommand($command, InputInterface $input, OutputInterface $output, array $env = [])
     {
         $process = Process::fromShellCommandline($command, null, $env, null, null);
-        
+
         $output->writeln('<options=bold,underscore>'.$command.'</>');
         $process->run();
 
