@@ -77,16 +77,6 @@ class General extends Command
     }
 
     /**
-     * Get the wp-cli command for the environment.
-     *
-     * @return string
-     */
-    protected function findWP()
-    {
-        return __DIR__.'/../vendor/wp-cli/wp-cli/bin/wp';
-    }
-
-    /**
      * Verify that the .env exist.
      *
      * @return void

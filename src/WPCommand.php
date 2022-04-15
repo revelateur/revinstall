@@ -31,7 +31,6 @@ class WPCommand extends General
         $this->decoration($output);
 
         $composer = $this->findComposer();
-        $wp = $this->findWP();
 
         $this->verifyEnvExist();
         $dotenv = Dotenv::createImmutable(getcwd());
@@ -48,16 +47,16 @@ class WPCommand extends General
         chdir(getcwd());
         $commands = [
             $composer.' u',
-            $wp.' core install --url='.$url.' --title="'.$title.'" --admin_user='.$user.' --admin_password='.$pass.' --admin_email='.$mail,
-            $wp.' theme activate '.$_ENV['WP_THEME'],
-            $wp.' language core activate fr_FR',
-            $wp.' plugin activate --all',
-            $wp.' menu create "Menu Principal"',
-            $wp.' menu location assign menu-principal primary',
-            $wp.' menu create "Pied de page"',
-            $wp.' menu location assign pied-de-page footer',
-            $wp.' post delete 1 --force',
-            $wp." option update permalink_structure '/%category%/%postname%/'",
+            'wp core install --url='.$url.' --title="'.$title.'" --admin_user='.$user.' --admin_password='.$pass.' --admin_email='.$mail,
+            'wp theme activate '.$_ENV['WP_THEME'],
+            'wp language core activate fr_FR',
+            'wp plugin activate --all',
+            'wp menu create "Menu Principal"',
+            'wp menu location assign menu-principal primary',
+            'wp menu create "Pied de page"',
+            'wp menu location assign pied-de-page footer',
+            'wp post delete 1 --force',
+            "wp option update permalink_structure '/%category%/%postname%/'",
         ];
 
         if (!empty($chown)) {
@@ -98,16 +97,16 @@ class WPCommand extends General
     public function defineHomePage(InputInterface $input, OutputInterface $output, $wp)
     {
         // Create home page
-        $command = $wp.' post create --post_type=page --post_title="Accueil" --post_status=publish';
+        $command = 'wp post create --post_type=page --post_title="Accueil" --post_status=publish';
         $post = $this->runCommand($command, $input, $output);
         preg_match('/(?<=post )(.*)(?=.)/', $post, $homeID);
 
         // Definie home page in read option
         $this->runCommands([
-            $wp.' option update show_on_front "page"',
-            $wp.' option update page_on_front "'.$homeID[0].'"',
-            $wp.' menu item add-post menu-principal '.$homeID[0],
-            $wp.' menu item add-post menu-principal 2',
+            'wp option update show_on_front "page"',
+            'wp option update page_on_front "'.$homeID[0].'"',
+            'wp menu item add-post menu-principal '.$homeID[0],
+            'wp menu item add-post menu-principal 2',
         ], $input, $output);
     }
 }

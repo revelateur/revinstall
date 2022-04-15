@@ -9,7 +9,7 @@ if (file_exists(__DIR__.'/../../../autoload.php')) {
 
 use Symfony\Component\Console\Application;
 
-$app = new Application('Revelateur Installer', '1.0.0');
+$app = new Application('Revelateur Installer', '1.0.2');
 $app->add(new Revelateur\Revinstall\Console\WPCommand);
 
 $app->run();
